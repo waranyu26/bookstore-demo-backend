@@ -1,35 +1,31 @@
-import { AuthConfig } from './auth.config';
-import { Inject, Injectable } from '@nestjs/common';
+import { AuthConfig } from '../auth.config';
+import { Injectable } from '@nestjs/common';
 import {
   AuthenticationDetails,
   CognitoUser,
   CognitoUserPool,
   CognitoUserAttribute,
 } from 'amazon-cognito-identity-js';
+import { RegisterRequestDto } from '../model/register.request.dto';
+import { AuthenticateRequestDto } from '../model/authenticate.request.dto';
+import { VerifyRequestDto } from '../model/verify.request.dto';
 
 @Injectable()
 export class AuthService {
   private userPool: CognitoUserPool;
   private sessionUserAttributes: object;
-  constructor(
-    @Inject('AuthConfig')
-    private readonly authConfig: AuthConfig,
-  ) {
+  constructor(private readonly authConfig: AuthConfig) {
     this.userPool = new CognitoUserPool({
       UserPoolId: this.authConfig.userPoolId,
       ClientId: this.authConfig.clientId,
     });
   }
 
-  registerUser(registerRequest: {
-    name: string;
-    email: string;
-    password: string;
-  }) {
-    const { name, email, password } = registerRequest;
+  registerUser(registerRequest: RegisterRequestDto) {
+    const { email, password } = registerRequest;
     return new Promise((resolve, reject) => {
       return this.userPool.signUp(
-        name,
+        email,
         password,
         [new CognitoUserAttribute({ Name: 'email', Value: email })],
         null,
@@ -44,15 +40,36 @@ export class AuthService {
     });
   }
 
-  authenticateUser(user: { name: string; password: string }) {
-    const { name, password } = user;
+  confirmRegistration(verifyRequest: VerifyRequestDto) {
+    const { email, code } = verifyRequest;
+
+    const userData = {
+      Username: email,
+      Pool: this.userPool,
+    };
+
+    const newUser = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      return newUser.confirmRegistration(code, true, (err, result) => {
+        if (!result) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  authenticateUser(user: AuthenticateRequestDto) {
+    const { email, password } = user;
 
     const authenticationDetails = new AuthenticationDetails({
-      Username: name,
+      Username: email,
       Password: password,
     });
     const userData = {
-      Username: name,
+      Username: email,
       Pool: this.userPool,
     };
 

@@ -37,5 +37,13 @@ lerna-debug.log*
 # AWS
 .aws
 
+# Serverless typescript
+/.build
+/.serverless
+.tsbuildinfo
+
 # Environment
 .env
+
+# DynamoDB
+/.dynamodb
