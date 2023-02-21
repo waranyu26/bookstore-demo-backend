@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Web3StoreService } from '../service/web3-store.service';
 import { Web3StoreController } from './web3-store.controller';
 
 describe('Web3StoreController', () => {
@@ -6,6 +7,12 @@ describe('Web3StoreController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        {
+          provide: Web3StoreService,
+          useValue: {},
+        },
+      ],
       controllers: [Web3StoreController],
     }).compile();
 

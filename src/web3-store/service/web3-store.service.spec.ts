@@ -6,7 +6,12 @@ describe('Web3StoreService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [Web3StoreService],
+      providers: [
+        {
+          provide: Web3StoreService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<Web3StoreService>(Web3StoreService);
